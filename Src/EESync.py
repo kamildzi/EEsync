@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
+from Src.Common.BackupAction import BackupAction
+from Src.Config.ConfigEntry import ConfigEntry
 from Src.Config.ConfigManager import ConfigManager
 from Src.IO.UserInputConsole import UserInputConsole
-from Src.Config.ConfigEntry import ConfigEntry
-from Src.Common.BackupAction import BackupAction
-from Src.Service.SyncProvider import SyncProvider
 from Src.Service.CryptProvider import CryptProvider
+from Src.Service.SyncProvider import SyncProvider
 
 
 class EESync:

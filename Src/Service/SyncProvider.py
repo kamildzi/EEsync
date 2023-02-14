@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
+import re
+
 from Src.Config.ConfigEntry import ConfigEntry
 from Src.Service.CommandRunner import CommandRunner
-from Src.IO.UserInputConsole import UserInputConsole
-import re
 
 
 class SyncProvider(CommandRunner):

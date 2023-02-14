@@ -1,10 +1,7 @@
-#!/usr/bin/env python3
 import os.path
 import re
-from Src.Common.BackupAction import BackupAction
-from functools import wraps
 
-input_caret = '> '
+from Src.Common.BackupAction import BackupAction
 
 
 class UserInputConsole:
@@ -12,13 +9,15 @@ class UserInputConsole:
     User input wrapper and validator.
     """
 
-    @staticmethod
-    def general_input_int():
+    input_caret = '> '
+
+    @classmethod
+    def general_input_int(cls):
         """
         General input - restricted only to integer values.
         """
         try:
-            user_input = int(input(input_caret))
+            user_input = int(input(cls.input_caret))
         except ValueError:
             print("Wrong value! Only numbers are allowed.")
             return UserInputConsole.general_input_int()
@@ -26,19 +25,19 @@ class UserInputConsole:
             raise SystemExit("\nInput interrupted. Terminating.")
         return user_input
 
-    @staticmethod
-    def general_input() -> str:
+    @classmethod
+    def general_input(cls) -> str:
         """
         General input.
         """
         try:
-            user_input = input(input_caret)
+            user_input = input(cls.input_caret)
         except (KeyboardInterrupt, EOFError):
             raise SystemExit("\nInput interrupted. Terminating.")
         return user_input
 
-    @staticmethod
-    def read_true_or_false() -> bool:
+    @classmethod
+    def read_true_or_false(cls) -> bool:
         """
         Reads general Yes or No values.
         """
@@ -56,8 +55,8 @@ class UserInputConsole:
         else:
             return False
 
-    @staticmethod
-    def read_config_no() -> str:
+    @classmethod
+    def read_config_no(cls) -> str:
         """
         Reads proper config number from the user.
         """
@@ -70,8 +69,8 @@ class UserInputConsole:
 
         return user_input
 
-    @staticmethod
-    def read_action() -> BackupAction:
+    @classmethod
+    def read_action(cls) -> BackupAction:
         """
         Reads the valid action (enum). Checks if the number is within the range of enum values.
         """
@@ -87,8 +86,8 @@ class UserInputConsole:
 
         return BackupAction(user_input)
 
-    @staticmethod
-    def read_directory_path() -> str:
+    @classmethod
+    def read_directory_path(cls) -> str:
         """
         Reads the valid path to the directory.
         """
@@ -100,8 +99,8 @@ class UserInputConsole:
 
         return user_input
 
-    @staticmethod
-    def read_file_path() -> str:
+    @classmethod
+    def read_file_path(cls) -> str:
         """
         Reads the valid path to the file.
         """

@@ -1,20 +1,10 @@
-#!/usr/bin/env python3
-
 import os
 import re
-
-from Src.Config.ConfigEntry import ConfigEntry
-from Src.IO.UserInputConsole import UserInputConsole
 from datetime import datetime
 
-config_version: float = 1.0
-"""Config files format version."""
-
-config_files_extension: str = "conf"
-"""File extension that configs are required to use."""
-
-config_files_directory: str = os.getcwd() + "/Config"
-"""Directory that will be used for saving the configuration files."""
+from Src.Config.ConfigEntry import ConfigEntry
+from Src.Config.ConfigVersion import ConfigVersion
+from Src.IO.UserInputConsole import UserInputConsole
 
 
 class ConfigManager:
@@ -36,8 +26,8 @@ class ConfigManager:
         Initialize the class.
         """
         self.config_list = []
-        self.config_match_regex = re.compile(".*[.]" + config_files_extension + "$")
-        self.config_directory = config_files_directory
+        self.config_match_regex = re.compile(".*[.]" + ConfigVersion.config_files_extension + "$")
+        self.config_directory = ConfigVersion.config_files_directory
 
         if not os.path.isdir(self.config_directory):
             raise Exception("Not a directory! Wrong config directory: " + self.config_directory)
@@ -82,7 +72,7 @@ class ConfigManager:
 
         save_file_name = str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                              + '_' + filtered_name
-                             + '.' + config_files_extension
+                             + '.' + ConfigVersion.config_files_extension
                              )[:255]
 
         # prepare the location

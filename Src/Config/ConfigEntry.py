@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
-
 import json
-import Src.Config.ConfigManager
+
+from Src.Config.ConfigVersion import ConfigVersion
 
 
 class ConfigEntry:
@@ -13,7 +12,7 @@ class ConfigEntry:
         """
         Initializes the entry.
         """
-        self.config_version: float = Src.Config.ConfigManager.config_version
+        self.config_version: float = ConfigVersion.config_version
         self.general_name: str = ''
         self.backup_source_dir: str = ''
         self.backup_target_dir: str = ''
@@ -50,7 +49,7 @@ class ConfigEntry:
         # required fields
         try:
             self.config_version = read_json_field('config_version')
-            if self.config_version != Src.Config.ConfigManager.config_version:
+            if self.config_version != ConfigVersion.config_version:
                 raise SystemExit("Wrong config version!")
 
             self.general_name = read_json_field('general_name')
@@ -77,7 +76,7 @@ class ConfigEntry:
             summarize_line("General name", self.general_name),
             summarize_line("Backup source", self.backup_source_dir),
             summarize_line("Backup target", self.backup_target_dir),
-            summarize_line("EncFS: Encryption enabled", self.encfs_enabled)
+            summarize_line("EncFS: Encryption enabled", str(self.encfs_enabled))
         ])
 
         if self.encfs_enabled:

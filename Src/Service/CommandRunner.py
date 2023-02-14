@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
-
 import subprocess
-from sys import getdefaultencoding
 from os import environ
+from sys import getdefaultencoding
+
+from Src.IO.UserInputConsole import UserInputConsole
 
 
 class CommandRunner:
