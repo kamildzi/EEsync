@@ -1,4 +1,5 @@
 SavedConfig/*
+SavedLogs/*
 
 __pycache__/
 *.py[cod]

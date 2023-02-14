@@ -23,23 +23,39 @@ class CommandRunner:
     """Actual binary version."""
 
     @staticmethod
-    def os_exec(command: list) -> subprocess.CompletedProcess:
+    def os_exec(command: list, confirmation_required: bool = False) -> subprocess.CompletedProcess:
         """
         A runner method. Throws exception when returncode is not 0.
+        :param command: Command and the parameters in the form of a list.
+        :param confirmation_required: bool value, False by default. Decide if we should ask user for the confirmation. 
+        :return: CompletedProcess object.
         """
         process_env = dict(environ)
         process_env['LC_ALL'] = 'C'
-        command_result = subprocess.run(
-            command,
-            capture_output=True,
-            encoding=getdefaultencoding(),
-            env=process_env
-        )
+
+        if confirmation_required:
+            print("About to execute the command: \n"
+                  + ' '.join(command)
+                  + "\nPlease confirm.")
+            user_confirmed = UserInputConsole.read_true_or_false()
+        else:
+            user_confirmed = True
+
+        command_result = None
+        if user_confirmed:
+            print(f"( Running: {command[0]} ... )")
+            command_result = subprocess.run(
+                command,
+                capture_output=True,
+                encoding=getdefaultencoding(),
+                env=process_env
+            )
+        else:
+            SystemExit("Aborted.")
 
         if command_result.returncode != 0:
             raise Exception(f"Error: Failed to run: {command} "
                             + f"\nDetails: \nSTDOUT: {command_result.stdout}\nSTDERR: {command_result.stderr}\n")
-
         return command_result
 
     def version_check(self):

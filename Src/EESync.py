@@ -78,18 +78,21 @@ class EESync:
               + action_list)
         user_action = UserInputConsole.read_action()
 
+        # ask for the final review and confirmation
         print(
             f"\nYou are bout to run the action: {user_action.name} \n"
             + "for following configuration: \n"
             + f" Data directory: \n >> {entry.backup_source_dir}\n"
-            + f" Backup directory: \n >> {entry.backup_target_dir}\n"
-            + f" Encryption enabled: \n >> {entry.encfs_enabled}\n"
-            + "Is it correct? "
+            + f" Backup data directory: \n >> {entry.backup_target_dir}\n"
+            + f" Encryption enabled: \n >> {entry.encfs_enabled}"
         )
+        if entry.encfs_enabled:
+            print(f" Decrypted backup data directory: \n >> {entry.encfs_decryption_dir}")
+        print("Is this correct?")
         final_acceptance = UserInputConsole.read_true_or_false()
 
+        # proceed with final action
         if final_acceptance:
-            print("Starting the process. Please wait... ")
             self.sync_service.set_config(entry)
             if entry.encfs_enabled:
                 self.crypt_service.set_config(entry)
