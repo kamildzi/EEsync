@@ -1,7 +1,9 @@
+import atexit
 import subprocess
 from os import environ
 from sys import getdefaultencoding
 
+import GeneralSettings
 from Src.IO.UserInputConsole import UserInputConsole
 
 
@@ -22,18 +24,27 @@ class CommandRunner:
     detected_version: tuple = None
     """Actual binary version."""
 
+    def __init__(self):
+        """
+        Initialize the module.
+        """
+        self.version_detect()
+        atexit.register(self.cleanup)
+
     @staticmethod
-    def os_exec(command: list, confirmation_required: bool = False) -> subprocess.CompletedProcess:
+    def os_exec(command: list, confirmation_required: bool = False, silent: bool = False
+                ) -> subprocess.CompletedProcess:
         """
         A runner method. Throws exception when returncode is not 0.
         :param command: Command and the parameters in the form of a list.
-        :param confirmation_required: bool value, False by default. Decide if we should ask user for the confirmation. 
+        :param confirmation_required: bool value, False by default. Decide if we should ask user for the confirmation.
+        :param silent: bool value, False by default. Allows to suppress printing the binary name that gets executed.
         :return: CompletedProcess object.
         """
         process_env = dict(environ)
         process_env['LC_ALL'] = 'C'
 
-        if confirmation_required:
+        if confirmation_required and GeneralSettings.runner["confirm_os_commands"]:
             print("About to execute the command: \n"
                   + ' '.join(command)
                   + "\nPlease confirm.")
@@ -41,9 +52,9 @@ class CommandRunner:
         else:
             user_confirmed = True
 
-        command_result = None
         if user_confirmed:
-            print(f"( Running: {command[0]} ... )")
+            if not silent:
+                print(f"( Running: {command[0]} ... )")
             command_result = subprocess.run(
                 command,
                 capture_output=True,
@@ -51,11 +62,11 @@ class CommandRunner:
                 env=process_env
             )
         else:
-            SystemExit("Aborted.")
+            raise SystemExit("Aborted.")
 
         if command_result.returncode != 0:
-            raise Exception(f"Error: Failed to run: {command} "
-                            + f"\nDetails: \nSTDOUT: {command_result.stdout}\nSTDERR: {command_result.stderr}\n")
+            raise SystemExit(f"Error: Failed to run: {command} "
+                             + f"\nDetails: \nSTDOUT: {command_result.stdout}\nSTDERR: {command_result.stderr}\n")
         return command_result
 
     def version_check(self):
@@ -80,8 +91,20 @@ class CommandRunner:
             else:
                 raise SystemExit("Aborted by user.")
 
+    def cleanup(self):
+        """
+        Post-run cleanups. This method will be called automatically at the end of execution.
+        """
+        pass
+
+    def version_detect(self):
+        """
+        Detects the binary's version and pre-sets required variables.
+        """
+        raise Exception(f" (( {self.__class__} Not implemented! )) ")
+
     def run(self, *args):
         """
         Implementation of the binary usage.
         """
-        print(f" (( {self.__class__} Not implemented! )) ")
+        raise Exception(f" (( {self.__class__} Not implemented! )) ")

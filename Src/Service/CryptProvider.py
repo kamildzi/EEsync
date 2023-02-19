@@ -1,9 +1,24 @@
 #!/usr/bin/env python3
 
 import re
+from functools import wraps
 
+from Src.Common.BackupAction import BackupAction
 from Src.Config.ConfigEntry import ConfigEntry
 from Src.Service.CommandRunner import CommandRunner
+
+
+def validate_config(method):
+    """
+    Continue only if the config is valid and encfs is enabled.
+    """
+
+    @wraps(method)
+    def __wrapper(self, *method_args, **method_kwargs):
+        if self.config and self.config.encfs_enabled:
+            return method(self, *method_args, **method_kwargs)
+
+    return __wrapper
 
 
 class CryptProvider(CommandRunner):
@@ -16,17 +31,19 @@ class CryptProvider(CommandRunner):
     config: ConfigEntry = None
     """Config to be set manually with `set_config()` method."""
 
-    def __init__(self):
-        """
-        Detects the binary's version and pre-sets required variables.
-        """
+    __resource_mounted: bool = False
+    """
+    Mount flag to tell us if we have the resource mounted or not.
+    This should be managed automatically by the functions.
+    """
 
+    def version_detect(self):
         # detect binary path
-        which_result = self.os_exec(["which", self.binary_name])
+        which_result = self.os_exec(["which", self.binary_name], silent=True)
         self.binary_path = str(which_result.stdout).strip()
 
         # detect/parse the version
-        version_check_result = self.os_exec([self.binary_path, "--version"])
+        version_check_result = self.os_exec([self.binary_path, "--version"], silent=True)
         result_string = str(version_check_result.stderr).strip()
         matched_string = re.search(r"^encfs\s+version\s+(\d.*\.\d)\s*$", result_string)
         if not matched_string:
@@ -36,10 +53,60 @@ class CryptProvider(CommandRunner):
             int(num) for num in version_string.split('.')
         ])
 
+    def cleanup(self):
+        self.__unmount_encfs()
+
+    @validate_config
+    def __unmount_encfs(self):
+        """
+        Unmounts the data access directory.
+        """
+        print("Unmounting EncFS...")
+        if not self.__resource_mounted:
+            print("... skipped - already unmounted!")
+            return
+
+        which_result = self.os_exec(["which", "umount"], silent=True)
+        umount_binary = str(which_result.stdout).strip()
+        exec_command: list = [umount_binary, self.config.encfs_decryption_dir]
+
+        umount_result = self.os_exec(exec_command, confirmation_required=True)
+        self.__resource_mounted = False
+
+        # TODO: logger
+        run_report = str(f"--- STDOUT: '{exec_command}': ---\n"
+                         + umount_result.stdout
+                         + f"--- STDERR: '{exec_command}': ---\n"
+                         + umount_result.stderr)
+        print(run_report)
+
+    @validate_config
+    def __mount_encfs(self):
+        """
+        Mounts the data access directory.
+        """
+        print("Mounting EncFS...")
+        if self.__resource_mounted:
+            print("... skipped - already mounted!")
+            return
+
+        exec_command: list = [self.binary_path, self.config.encfs_encryption_dir, self.config.encfs_decryption_dir]
+        mount_result = self.os_exec(exec_command, confirmation_required=True)
+        self.__resource_mounted = True
+
+        # TODO: logger
+        run_report = str(f"--- STDOUT: '{exec_command}': ---\n"
+                         + mount_result.stdout
+                         + f"--- STDERR: '{exec_command}': ---\n"
+                         + mount_result.stderr)
+        print(run_report)
+
     def set_config(self, config: ConfigEntry):
         """
         Set the config to work with.
         """
         self.config = config
-        if not self.config.encfs_enabled:
-            raise Exception("EncFS encryption was requested, but it is not supported disabled by the given config!")
+
+    @validate_config
+    def run(self, action: BackupAction):
+        self.__mount_encfs()

@@ -93,10 +93,8 @@ class EESync:
 
         # proceed with final action
         if final_acceptance:
-            self.sync_service.set_config(entry)
-            if entry.encfs_enabled:
-                self.crypt_service.set_config(entry)
-                self.crypt_service.run(user_action)
-            self.sync_service.run(user_action)
+            for service in [self.crypt_service, self.sync_service]:
+                service.set_config(entry)
+                service.run(user_action)
         else:
             print("Aborted.")

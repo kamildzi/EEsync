@@ -18,17 +18,13 @@ class SyncProvider(CommandRunner):
     config: ConfigEntry = None
     """Config to be set manually with `set_config()` method."""
 
-    def __init__(self):
-        """
-        Detects the binary's version and pre-sets required variables.
-        """
-
+    def version_detect(self):
         # detect binary path
-        which_result = self.os_exec(["which", self.binary_name])
+        which_result = self.os_exec(["which", self.binary_name], silent=True)
         self.binary_path = str(which_result.stdout).strip()
 
         # detect/parse the version
-        version_check_result = self.os_exec([self.binary_path, "--version"])
+        version_check_result = self.os_exec([self.binary_path, "--version"], silent=True)
         result_string = str(version_check_result.stdout).strip()
         matched_string = re.search(r"^rsync\s+version\s+(\d.*\.\d)\s+", result_string)
         if not matched_string:
@@ -94,13 +90,13 @@ class SyncProvider(CommandRunner):
         exec_command: list = [self.binary_path] + rsync_base_params + [source_dir, target_dir]
 
         # run the command
-        rsync_result = self.os_exec(exec_command, True)
+        rsync_result = self.os_exec(exec_command, confirmation_required=True)
 
         # save the report
-        # TODO - save it to a file
-        run_report = str("--- STDOUT: ---\n"
+        # TODO - save it to a file, create some logger
+        run_report = str(f"--- STDOUT: '{exec_command}': ---\n"
                          + rsync_result.stdout
-                         + "--- STDERR: ---\n"
+                         + f"--- STDERR: '{exec_command}': ---\n"
                          + rsync_result.stderr)
         print(run_report)
 

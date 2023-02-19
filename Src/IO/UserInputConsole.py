@@ -44,13 +44,13 @@ class UserInputConsole:
         input_regex = re.compile("(^y$|^yes$)|(^n$|^no$)", re.IGNORECASE)
         user_input = UserInputConsole.general_input()
 
-        match = input_regex.match(user_input)
-        while not match:
+        matched = input_regex.match(user_input)
+        while not matched:
             print("Wrong value! Type 'y' or 'n'. ")
             user_input = UserInputConsole.general_input()
-            match = input_regex.match(user_input)
+            matched = input_regex.match(user_input)
 
-        if match.groups()[0]:
+        if matched.groups()[0]:
             return True
         else:
             return False
