@@ -5,6 +5,7 @@ import re
 
 from Src.Common.BackupAction import BackupAction
 from Src.Config.ConfigEntry import ConfigEntry
+from Src.IO.Logger import Logger
 from Src.Service.CommandRunner import CommandRunner
 
 
@@ -93,11 +94,10 @@ class SyncProvider(CommandRunner):
         rsync_result = self.os_exec(exec_command, confirmation_required=True)
 
         # save the report
-        # TODO - save it to a file, create some logger
-        run_report = str(f"--- STDOUT: '{exec_command}': ---\n"
+        run_report = str(f"--- STDOUT: {exec_command}: ---\n"
                          + rsync_result.stdout
-                         + f"--- STDERR: '{exec_command}': ---\n"
+                         + f"--- STDERR: {exec_command}: ---\n"
                          + rsync_result.stderr)
-        print(run_report)
+        Logger.log(run_report)
 
         print("Done!")

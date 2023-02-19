@@ -12,8 +12,9 @@ logger = {
 
     # Choose the logging method.
     # Available methods - uncomment one:
-    "log_method": "stdout",  # Standard output (console output).
-    # "log_method": "file",  # Logs to a file.
+    # "log_method": "stdout_file",  # Use stdout and file methods - both at once.
+    # "log_method": "stdout",  # Standard output (console output).
+    "log_method": "file",  # Logs to a file.
     # "log_method": "none",  # No logs at all.
 
     # If "log_method" is set to a "File", then this setting can be used to define custom log directory.

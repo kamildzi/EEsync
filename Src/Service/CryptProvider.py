@@ -5,6 +5,7 @@ from functools import wraps
 
 from Src.Common.BackupAction import BackupAction
 from Src.Config.ConfigEntry import ConfigEntry
+from Src.IO.Logger import Logger
 from Src.Service.CommandRunner import CommandRunner
 
 
@@ -73,12 +74,11 @@ class CryptProvider(CommandRunner):
         umount_result = self.os_exec(exec_command, confirmation_required=True)
         self.__resource_mounted = False
 
-        # TODO: logger
-        run_report = str(f"--- STDOUT: '{exec_command}': ---\n"
+        run_report = str(f"--- STDOUT: {exec_command}: ---\n"
                          + umount_result.stdout
-                         + f"--- STDERR: '{exec_command}': ---\n"
+                         + f"--- STDERR: {exec_command}: ---\n"
                          + umount_result.stderr)
-        print(run_report)
+        Logger.log(run_report)
 
     @validate_config
     def __mount_encfs(self):
@@ -94,12 +94,11 @@ class CryptProvider(CommandRunner):
         mount_result = self.os_exec(exec_command, confirmation_required=True)
         self.__resource_mounted = True
 
-        # TODO: logger
-        run_report = str(f"--- STDOUT: '{exec_command}': ---\n"
+        run_report = str(f"--- STDOUT: {exec_command}: ---\n"
                          + mount_result.stdout
-                         + f"--- STDERR: '{exec_command}': ---\n"
+                         + f"--- STDERR: {exec_command}: ---\n"
                          + mount_result.stderr)
-        print(run_report)
+        Logger.log(run_report)
 
     def set_config(self, config: ConfigEntry):
         """

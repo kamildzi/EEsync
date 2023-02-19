@@ -3,6 +3,7 @@
 from Src.Common.BackupAction import BackupAction
 from Src.Config.ConfigEntry import ConfigEntry
 from Src.Config.ConfigManager import ConfigManager
+from Src.IO.Logger import Logger
 from Src.IO.UserInputConsole import UserInputConsole
 from Src.Service.CryptProvider import CryptProvider
 from Src.Service.SyncProvider import SyncProvider
@@ -18,6 +19,8 @@ class EESync:
         """
         Starts the main process.
         """
+        Logger.init()
+
         print(f"~~ EESync {self.__version} ~~")
         self.sync_service.version_check()
         self.crypt_service.version_check()
