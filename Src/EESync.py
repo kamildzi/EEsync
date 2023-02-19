@@ -27,7 +27,7 @@ class EESync:
         print()
 
         self.interactive_user_menu()
-        print("Finished")
+        print("EESync finished.")
 
     def interactive_user_menu(self):
         """

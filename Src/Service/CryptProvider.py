@@ -74,10 +74,7 @@ class CryptProvider(CommandRunner):
         umount_result = self.os_exec(exec_command, confirmation_required=True)
         self.__resource_mounted = False
 
-        run_report = str(f"--- STDOUT: {exec_command}: ---\n"
-                         + umount_result.stdout
-                         + f"--- STDERR: {exec_command}: ---\n"
-                         + umount_result.stderr)
+        run_report = self.gen_run_report(exec_command, umount_result.stdout, umount_result.stderr)
         Logger.log(run_report)
 
     @validate_config
@@ -91,13 +88,10 @@ class CryptProvider(CommandRunner):
             return
 
         exec_command: list = [self.binary_path, self.config.encfs_encryption_dir, self.config.encfs_decryption_dir]
-        mount_result = self.os_exec(exec_command, confirmation_required=True)
+        mount_result = self.os_exec(exec_command, confirmation_required=True, capture_output=False)
         self.__resource_mounted = True
 
-        run_report = str(f"--- STDOUT: {exec_command}: ---\n"
-                         + mount_result.stdout
-                         + f"--- STDERR: {exec_command}: ---\n"
-                         + mount_result.stderr)
+        run_report = self.gen_run_report(exec_command, mount_result.stdout, mount_result.stderr)
         Logger.log(run_report)
 
     def set_config(self, config: ConfigEntry):

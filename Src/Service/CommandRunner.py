@@ -32,13 +32,14 @@ class CommandRunner:
         atexit.register(self.cleanup)
 
     @staticmethod
-    def os_exec(command: list, confirmation_required: bool = False, silent: bool = False
+    def os_exec(command: list, confirmation_required: bool = False, silent: bool = False, capture_output: bool = True
                 ) -> subprocess.CompletedProcess:
         """
         A runner method. Throws exception when returncode is not 0.
         :param command: Command and the parameters in the form of a list.
         :param confirmation_required: bool value, False by default. Decide if we should ask user for the confirmation.
         :param silent: bool value, False by default. Allows to suppress printing the binary name that gets executed.
+        :param capture_output: bool value, True by default. Allows to control whether the command output is captured.
         :return: CompletedProcess object.
         """
         process_env = dict(environ)
@@ -57,7 +58,7 @@ class CommandRunner:
                 print(f"( Running: {command[0]} ... )")
             command_result = subprocess.run(
                 command,
-                capture_output=True,
+                capture_output=capture_output,
                 encoding=getdefaultencoding(),
                 env=process_env
             )
@@ -68,6 +69,16 @@ class CommandRunner:
             raise SystemExit(f"Error: Failed to run: {command} "
                              + f"\nDetails: \nSTDOUT: {command_result.stdout}\nSTDERR: {command_result.stderr}\n")
         return command_result
+
+    @staticmethod
+    def gen_run_report(exec_command, stdout, stderr) -> str:
+        """
+        Generates formatted string from command output.
+        """
+        return str(f"--- STDOUT: {exec_command}: ---\n"
+                   + str(stdout)
+                   + f"--- STDERR: {exec_command}: ---\n"
+                   + str(stderr))
 
     def version_check(self):
         """

@@ -94,10 +94,7 @@ class SyncProvider(CommandRunner):
         rsync_result = self.os_exec(exec_command, confirmation_required=True)
 
         # save the report
-        run_report = str(f"--- STDOUT: {exec_command}: ---\n"
-                         + rsync_result.stdout
-                         + f"--- STDERR: {exec_command}: ---\n"
-                         + rsync_result.stderr)
+        run_report = self.gen_run_report(exec_command, rsync_result.stdout, rsync_result.stderr)
         Logger.log(run_report)
 
-        print("Done!")
+        print("Sync done!")
