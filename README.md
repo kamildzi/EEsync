@@ -14,5 +14,5 @@ Just run:
 An interactive menu will appear that will guide you through the process.
 
 # Configuration
-Base configuration can be found in `GeneralSettings.py`.
+Base configuration can be found in `GeneralSettings.py`.\
 Extra configuration gets saved in `SavedConfig` folder.
