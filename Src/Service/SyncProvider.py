@@ -2,7 +2,9 @@
 
 import os
 import re
+from datetime import datetime
 
+import GeneralSettings
 from Src.Common.BackupAction import BackupAction
 from Src.Config.ConfigEntry import ConfigEntry
 from Src.IO.Logger import Logger
@@ -82,16 +84,30 @@ class SyncProvider(CommandRunner):
                 raise SystemExit("Error! Not a directory: " + path)
 
         # prepare the command
-        rsync_base_params: list = [
-            "-avh", "--delete"
-        ]
+        rsync_settings = GeneralSettings.sync_rsync
+        rsync_base_params: list = rsync_settings['rsync_base_params']
+
         if dry_run:
-            rsync_base_params += ["--dry-run"]
+            rsync_base_params += rsync_settings["rsync_dry_run_params"]
+
+        if rsync_settings["rsync_logging_enabled"]:
+            # rsync logging - prepare the path
+            current_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            log_dir = Logger.get_log_path()
+            rsync_log_path = log_dir + f"/rsync_{current_date}.log"
+            if not os.path.isdir(log_dir) or os.path.isfile(rsync_log_path):
+                raise SystemExit('Error! Rsync logging paths misconfigured!')
+
+            # rsync logging - log to a file
+            rsync_base_params += [f"--log-file={rsync_log_path}"]
+
+            # rsync logging - extra params
+            rsync_base_params += rsync_settings["rsync_logging_extra_params"]
 
         exec_command: list = [self.binary_path] + rsync_base_params + [source_dir, target_dir]
 
         # run the command
-        rsync_result = self.os_exec(exec_command, confirmation_required=True)
+        rsync_result = self.os_exec(exec_command, confirmation_required=True, capture_output=False)
 
         # save the report
         run_report = self.gen_run_report(exec_command, rsync_result.stdout, rsync_result.stderr)

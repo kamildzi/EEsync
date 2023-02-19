@@ -10,7 +10,7 @@ from Src.Service.SyncProvider import SyncProvider
 
 
 class EESync:
-    __version = '0.9.0'
+    __version = '0.9.1'
 
     sync_service = SyncProvider()
     crypt_service = CryptProvider()

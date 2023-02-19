@@ -75,6 +75,10 @@ class CommandRunner:
         """
         Generates formatted string from command output.
         """
+        if stdout is None:
+            stdout = str(f"{stdout} - no output or output disabled.\n")
+        if stderr is None:
+            stderr = str(f"{stderr} - no output or output disabled.\n")
         return str(f"--- STDOUT: {exec_command}: ---\n"
                    + str(stdout)
                    + f"--- STDERR: {exec_command}: ---\n"

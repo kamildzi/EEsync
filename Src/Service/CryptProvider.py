@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import re
+import time
 from functools import wraps
 
 from Src.Common.BackupAction import BackupAction
@@ -66,6 +67,11 @@ class CryptProvider(CommandRunner):
         if not self.__resource_mounted:
             print("... skipped - already unmounted!")
             return
+
+        # It is very likely that the target is still busy.
+        # Sleep is surely a bad solution, but for now - it's enough.
+        # TODO: check if target is busy, get rid of sleep()
+        time.sleep(10.0)
 
         which_result = self.os_exec(["which", "umount"], silent=True)
         umount_binary = str(which_result.stdout).strip()

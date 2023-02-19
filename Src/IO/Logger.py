@@ -29,6 +29,13 @@ class Logger:
             cls.__log_dir = default_logs_directory
 
     @classmethod
+    def get_log_path(cls):
+        """
+        Returns the application log directory.
+        """
+        return cls.__log_dir
+
+    @classmethod
     def log(cls, text: str, log_level: str = None):
         """
         Save the log.
