@@ -1,9 +1,9 @@
 # EEsync
-EEsync - easy solution for encrypted backups (based on rsync and EncFS)
+EEsync - easy solution for encrypted backups (based on rsync and EncFS).
 
 # Requirements
-- rsync 3.2.7 or higher
-- EncFS 1.9.5 or hidher
+- rsync
+- EncFS
 - Python 3.10 or higher
 
 # How to start
