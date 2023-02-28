@@ -23,11 +23,11 @@ class SyncProvider(CommandRunner):
 
     def version_detect(self):
         # detect binary path
-        which_result = self.os_exec(["which", self.binary_name], silent=True)
+        which_result = self.os_exec(["which", self.binary_name], silent=True, logging_enabled=False)
         self.binary_path = str(which_result.stdout).strip()
 
         # detect/parse the version
-        version_check_result = self.os_exec([self.binary_path, "--version"], silent=True)
+        version_check_result = self.os_exec([self.binary_path, "--version"], silent=True, logging_enabled=False)
         result_string = str(version_check_result.stdout).strip()
         matched_string = re.search(r"^rsync\s+version\s+(\d.*\.\d)\s+", result_string)
         if not matched_string:
@@ -93,7 +93,7 @@ class SyncProvider(CommandRunner):
         if rsync_settings["rsync_logging_enabled"]:
             # rsync logging - prepare the path
             current_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            log_dir = Logger.get_log_path()
+            log_dir = Logger.get_log_path_dir()
             rsync_log_path = log_dir + f"/rsync_{current_date}.log"
             if not os.path.isdir(log_dir) or os.path.isfile(rsync_log_path):
                 raise SystemExit('Error! Rsync logging paths misconfigured!')
@@ -110,7 +110,6 @@ class SyncProvider(CommandRunner):
         rsync_result = self.os_exec(exec_command, confirmation_required=True, capture_output=False)
 
         # save the report
-        run_report = self.gen_run_report(exec_command, rsync_result.stdout, rsync_result.stderr)
-        Logger.log(run_report)
+        self.gen_run_report(exec_command, rsync_result.stdout, rsync_result.stderr)
 
         print("Sync done!")

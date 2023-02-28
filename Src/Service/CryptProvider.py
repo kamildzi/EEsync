@@ -6,7 +6,6 @@ from functools import wraps
 
 from Src.Common.BackupAction import BackupAction
 from Src.Config.ConfigEntry import ConfigEntry
-from Src.IO.Logger import Logger
 from Src.Service.CommandRunner import CommandRunner
 
 
@@ -41,11 +40,11 @@ class CryptProvider(CommandRunner):
 
     def version_detect(self):
         # detect binary path
-        which_result = self.os_exec(["which", self.binary_name], silent=True)
+        which_result = self.os_exec(["which", self.binary_name], silent=True, logging_enabled=False)
         self.binary_path = str(which_result.stdout).strip()
 
         # detect/parse the version
-        version_check_result = self.os_exec([self.binary_path, "--version"], silent=True)
+        version_check_result = self.os_exec([self.binary_path, "--version"], silent=True, logging_enabled=False)
         result_string = str(version_check_result.stderr).strip()
         matched_string = re.search(r"^encfs\s+version\s+(\d.*\.\d)\s*$", result_string)
         if not matched_string:
@@ -73,15 +72,13 @@ class CryptProvider(CommandRunner):
         # TODO: check if target is busy, get rid of sleep()
         time.sleep(10.0)
 
-        which_result = self.os_exec(["which", "umount"], silent=True)
+        which_result = self.os_exec(["which", "umount"], silent=True, logging_enabled=False)
         umount_binary = str(which_result.stdout).strip()
         exec_command: list = [umount_binary, self.config.encfs_decryption_dir]
 
         umount_result = self.os_exec(exec_command, confirmation_required=True)
         self.__resource_mounted = False
-
-        run_report = self.gen_run_report(exec_command, umount_result.stdout, umount_result.stderr)
-        Logger.log(run_report)
+        self.gen_run_report(exec_command, umount_result.stdout, umount_result.stderr)
 
     @validate_config
     def __mount_encfs(self):
@@ -96,9 +93,7 @@ class CryptProvider(CommandRunner):
         exec_command: list = [self.binary_path, self.config.encfs_encryption_dir, self.config.encfs_decryption_dir]
         mount_result = self.os_exec(exec_command, confirmation_required=True, capture_output=False)
         self.__resource_mounted = True
-
-        run_report = self.gen_run_report(exec_command, mount_result.stdout, mount_result.stderr)
-        Logger.log(run_report)
+        self.gen_run_report(exec_command, mount_result.stdout, mount_result.stderr)
 
     def set_config(self, config: ConfigEntry):
         """

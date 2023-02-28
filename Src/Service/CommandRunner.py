@@ -5,6 +5,7 @@ from sys import getdefaultencoding
 
 import GeneralSettings
 from Src.IO.UserInputConsole import UserInputConsole
+from Src.IO.Logger import Logger
 
 
 class CommandRunner:
@@ -32,14 +33,15 @@ class CommandRunner:
         atexit.register(self.cleanup)
 
     @staticmethod
-    def os_exec(command: list, confirmation_required: bool = False, silent: bool = False, capture_output: bool = True
-                ) -> subprocess.CompletedProcess:
+    def os_exec(command: list, confirmation_required: bool = False, silent: bool = False, capture_output: bool = True,
+                logging_enabled: bool = True) -> subprocess.CompletedProcess:
         """
         A runner method. Throws exception when returncode is not 0.
         :param command: Command and the parameters in the form of a list.
         :param confirmation_required: bool value, False by default. Decide if we should ask user for the confirmation.
         :param silent: bool value, False by default. Allows to suppress printing the binary name that gets executed.
         :param capture_output: bool value, True by default. Allows to control whether the command output is captured.
+        :param logging_enabled: bool value, True by default. Allows to control whether the logging feature is enabled.
         :return: CompletedProcess object.
         """
         process_env = dict(environ)
@@ -54,6 +56,8 @@ class CommandRunner:
             user_confirmed = True
 
         if user_confirmed:
+            if logging_enabled:
+                Logger.log("Executing command: \n" + ' '.join(command))
             if not silent:
                 print(f"( Running: {command[0]} ... )")
             command_result = subprocess.run(
@@ -63,26 +67,40 @@ class CommandRunner:
                 env=process_env
             )
         else:
+            if logging_enabled:
+                Logger.log("Skipped command / execution aborted: \n" + ' '.join(command))
             raise SystemExit("Aborted.")
 
         if command_result.returncode != 0:
-            raise SystemExit(f"Error: Failed to run: {command} "
+            failed_msg = str(f"Error: Failed to run: {command} "
                              + f"\nDetails: \nSTDOUT: {command_result.stdout}\nSTDERR: {command_result.stderr}\n")
+            if logging_enabled:
+                Logger.log(failed_msg)
+            raise SystemExit(failed_msg)
+
         return command_result
 
     @staticmethod
-    def gen_run_report(exec_command, stdout, stderr) -> str:
+    def gen_run_report(exec_command, stdout, stderr, logging_enabled: bool = True) -> str:
         """
-        Generates formatted string from command output.
+        Generates formatted string from command output. Useful only for the reports.
+        :param exec_command: Command that you executed.
+        :param stdout: Standard output from the command.
+        :param stderr: Standard error output from the command.
+        :param logging_enabled: Allows to pass the output (returned value) to the logger.
+        :return: formatted string.
         """
         if stdout is None:
             stdout = str(f"{stdout} - no output or output disabled.\n")
         if stderr is None:
             stderr = str(f"{stderr} - no output or output disabled.\n")
-        return str(f"--- STDOUT: {exec_command}: ---\n"
-                   + str(stdout)
-                   + f"--- STDERR: {exec_command}: ---\n"
-                   + str(stderr))
+        formatted_string = str(f"--- STDOUT: {exec_command}: ---\n"
+                               + str(stdout)
+                               + f"--- STDERR: {exec_command}: ---\n"
+                               + str(stderr))
+        if logging_enabled:
+            Logger.log(formatted_string)
+        return formatted_string
 
     def version_check(self):
         """

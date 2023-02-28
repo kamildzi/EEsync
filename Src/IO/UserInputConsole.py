@@ -2,6 +2,7 @@ import os.path
 import re
 
 from Src.Common.BackupAction import BackupAction
+from Src.IO.Logger import Logger
 
 
 class UserInputConsole:
@@ -22,6 +23,7 @@ class UserInputConsole:
             print("Wrong value! Only numbers are allowed.")
             return UserInputConsole.general_input_int()
         except (KeyboardInterrupt, EOFError):
+            Logger.log("Input interrupted. Terminating.")
             raise SystemExit("\nInput interrupted. Terminating.")
         return user_input
 
@@ -33,6 +35,7 @@ class UserInputConsole:
         try:
             user_input = input(cls.input_caret)
         except (KeyboardInterrupt, EOFError):
+            Logger.log("Input interrupted. Terminating.")
             raise SystemExit("\nInput interrupted. Terminating.")
         return user_input
 

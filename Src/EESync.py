@@ -3,6 +3,7 @@
 from Src.Common.BackupAction import BackupAction
 from Src.Config.ConfigEntry import ConfigEntry
 from Src.Config.ConfigManager import ConfigManager
+from Src.IO.FileSystem import FileSystem
 from Src.IO.Logger import Logger
 from Src.IO.UserInputConsole import UserInputConsole
 from Src.Service.CryptProvider import CryptProvider
@@ -10,16 +11,21 @@ from Src.Service.SyncProvider import SyncProvider
 
 
 class EESync:
-    __version = '0.9.1'
+    __version = '0.9.2'
 
     sync_service = SyncProvider()
     crypt_service = CryptProvider()
+    cm_object = None  # postpone initialization
 
     def start(self):
         """
         Starts the main process.
         """
         Logger.init()
+        self.init_file_system()
+        self.cm_object = ConfigManager()
+
+        Logger.log(f"EESync {self.__version} started.")
 
         print(f"~~ EESync {self.__version} ~~")
         self.sync_service.version_check()
@@ -27,18 +33,27 @@ class EESync:
         print()
 
         self.interactive_user_menu()
+
+        Logger.log("EESync finished.")
         print("EESync finished.")
+
+    @classmethod
+    def init_file_system(cls):
+        """
+        Inits and creates (if needed) directories required by the application (logs dir, config dir, etc).
+        """
+        FileSystem.require_created_directory(Logger.get_log_path_dir())
+        FileSystem.require_created_directory(ConfigManager.get_config_directory())
 
     def interactive_user_menu(self):
         """
         Handles the interactive user menu - main menu.
         """
-        cm_object = ConfigManager()
-        cm_object.search_config_entries()
+        self.cm_object.search_config_entries()
 
-        if len(cm_object.config_list):
+        if len(self.cm_object.config_list):
             entry_list_string = ''
-            for config_entry in cm_object.config_list:
+            for config_entry in self.cm_object.config_list:
                 entry_list_string += str(
                     f"  {config_entry['config_number']} - {config_entry['general_name']}\n"
                 )
@@ -54,13 +69,13 @@ class EESync:
         match user_input:
             case number if user_input.isdigit():
                 print("Selected entry no. " + number + " ...")
-                selected_config = cm_object.config_list[int(number) - 1]
+                selected_config = self.cm_object.config_list[int(number) - 1]
                 self.process_entry(selected_config['config_object'])
                 pass
             case 'n':
                 print("Creating new config.")
-                new_config_entry = cm_object.new_entry_from_user()
-                cm_object.save_config_entry(new_config_entry)
+                new_config_entry = self.cm_object.new_entry_from_user()
+                self.cm_object.save_config_entry(new_config_entry)
                 self.interactive_user_menu()
             case _:
                 print("Wrong command!")

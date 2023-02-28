@@ -27,10 +27,18 @@ class ConfigManager:
         """
         self.config_list = []
         self.config_match_regex = re.compile(".*[.]" + ConfigVersion.config_files_extension + "$")
-        self.config_directory = ConfigVersion.config_files_directory
+        self.config_directory = self.get_config_directory()
 
         if not os.path.isdir(self.config_directory):
-            raise Exception("Not a directory! Wrong config directory: " + self.config_directory)
+            raise SystemExit("Wrong config directory! Not a directory: " + self.config_directory)
+
+    @classmethod
+    def get_config_directory(cls):
+        """
+        Returns the config directory. Can be called before the object is created.
+        :return: str: config directory path.
+        """
+        return ConfigVersion.config_files_directory
 
     def search_config_entries(self):
         """

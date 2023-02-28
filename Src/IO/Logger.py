@@ -29,7 +29,7 @@ class Logger:
             cls.__log_dir = default_logs_directory
 
     @classmethod
-    def get_log_path(cls):
+    def get_log_path_dir(cls):
         """
         Returns the application log directory.
         """
@@ -94,7 +94,7 @@ class Logger:
 
         # file validation
         if not isdir(cls.__log_dir):
-            raise SystemExit(f"Error! Wrong logs directory (not a directory): f{cls.__log_dir}")
+            raise SystemExit(f"Error! Wrong logs directory (not a directory): {cls.__log_dir}")
         if not isfile(save_path):
             raise SystemExit(f"Error! Tried to log to a file, but the file is gone: {save_path}")
 
@@ -113,7 +113,7 @@ class Logger:
 
         # file validation
         if not isdir(cls.__log_dir):
-            raise SystemExit(f"Error! Wrong logs directory (not a directory): f{cls.__log_dir}")
+            raise SystemExit(f"Error! Wrong logs directory (not a directory): {cls.__log_dir}")
         if isfile(save_path):
             raise SystemExit(f"Error! Tried to log to a new file, but the file already exists: {save_path}")
 
