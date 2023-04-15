@@ -11,7 +11,7 @@ from Src.Service.SyncProvider import SyncProvider
 
 
 class EESync:
-    __version = '0.9.2'
+    __version = '0.9.3'
 
     sync_service = SyncProvider()
     crypt_service = CryptProvider()
@@ -33,6 +33,9 @@ class EESync:
         print()
 
         self.interactive_user_menu()
+
+        print("Cleanup actions...")
+        Logger.cleanup()
 
         Logger.log("EESync finished.")
         print("EESync finished.")

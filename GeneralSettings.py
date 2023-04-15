@@ -21,7 +21,12 @@ logger = {
 
     # If "log_method" is set to a "File", then this setting can be used to define custom log directory.
     # Blank value ("") means that logs will be saved in application directory ("./SavedLogs").
-    "custom_log_dir_path": ""
+    "custom_log_dir_path": "",
+
+    # Allows to define number of days after which the logs will be deleted.
+    # Empty value "" means than the feature is disabled (EEsync will not delete any logs on its own).
+    # Note: for advanced logging control it is recommended to use a dedicated tool (like logrotate).
+    "remove_logs_older_than_days": "14"
 }
 
 sync_rsync = {

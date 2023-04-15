@@ -4,8 +4,8 @@ from os import environ
 from sys import getdefaultencoding
 
 import GeneralSettings
-from Src.IO.UserInputConsole import UserInputConsole
 from Src.IO.Logger import Logger
+from Src.IO.UserInputConsole import UserInputConsole
 
 
 class CommandRunner:
@@ -34,7 +34,7 @@ class CommandRunner:
 
     @staticmethod
     def os_exec(command: list, confirmation_required: bool = False, silent: bool = False, capture_output: bool = True,
-                logging_enabled: bool = True) -> subprocess.CompletedProcess:
+                logging_enabled: bool = True, continue_on_failure: bool = False) -> subprocess.CompletedProcess:
         """
         A runner method. Throws exception when returncode is not 0.
         :param command: Command and the parameters in the form of a list.
@@ -42,6 +42,8 @@ class CommandRunner:
         :param silent: bool value, False by default. Allows to suppress printing the binary name that gets executed.
         :param capture_output: bool value, True by default. Allows to control whether the command output is captured.
         :param logging_enabled: bool value, True by default. Allows to control whether the logging feature is enabled.
+        :param continue_on_failure: bool value, False by default. Allows to continue normal execution on failures
+        (allows to accept non-zero result codes).
         :return: CompletedProcess object.
         """
         process_env = dict(environ)
@@ -76,7 +78,8 @@ class CommandRunner:
                              + f"\nDetails: \nSTDOUT: {command_result.stdout}\nSTDERR: {command_result.stderr}\n")
             if logging_enabled:
                 Logger.log(failed_msg)
-            raise SystemExit(failed_msg)
+            if not continue_on_failure:
+                raise SystemExit(failed_msg)
 
         return command_result
 

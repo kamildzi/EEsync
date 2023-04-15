@@ -1,6 +1,8 @@
 from datetime import datetime
-from os import getcwd
+from glob import glob
+from os import getcwd, stat, remove
 from os.path import isdir, isfile
+from time import mktime
 
 import GeneralSettings
 
@@ -10,6 +12,7 @@ class Logger:
     The logger class.
     """
     __start_date = None
+    __start_time = None
     __log_dir = None
     __log_file_is_ready: bool = False
 
@@ -19,7 +22,9 @@ class Logger:
         Initialize the logger object.
         """
         # set the date
-        cls.__start_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        curr_datetime = datetime.now()
+        cls.__start_date = curr_datetime.strftime("%Y-%m-%d_%H:%M:%S")
+        cls.__start_time = mktime(curr_datetime.timetuple())
 
         # set the log directory
         default_logs_directory: str = getcwd() + "/SavedLogs"
@@ -121,3 +126,32 @@ class Logger:
         with open(save_path, 'w'):
             pass
         cls.__log_file_is_ready = True
+
+    @classmethod
+    def cleanup(cls):
+        """
+        Handle the cleanup actions.
+        """
+        try:
+            remove_logs_older_than_days = int(GeneralSettings.logger["remove_logs_older_than_days"])
+        except ValueError:
+            remove_logs_older_than_days = 0
+
+        if remove_logs_older_than_days > 0:
+            # remove old logs
+            cls.log(f"Rotating logs older than {remove_logs_older_than_days} days")
+
+            files_for_deletion = []
+            list_of_log_files = glob(f"{cls.__log_dir}/*.log")
+            for log_file in list_of_log_files:
+                # count time
+                file_time = stat(log_file).st_mtime
+                time_diff = cls.__start_time - file_time
+                days_diff = time_diff / 60 / 60 / 24
+                # register files for deletion
+                if days_diff > remove_logs_older_than_days:
+                    files_for_deletion.append(log_file)
+
+            cls.log(f"Processing list of files for deletion: {files_for_deletion}")
+            for file_to_delete in files_for_deletion:
+                remove(file_to_delete)
