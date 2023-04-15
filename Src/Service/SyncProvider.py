@@ -75,7 +75,8 @@ class SyncProvider(CommandRunner):
         Executes the rsync command.
         :param source_dir: Source directory - what to copy?
         :param target_dir: Target directory - where to save a copy?
-        :param dry_run: Should we do a test run? True means that rsync will only list the changes (but will not do anything to the files)
+        :param dry_run: Should we do a test run? True means that rsync will only list the changes
+        (but will not do anything to the files)
         """
 
         # validate source and target directories
@@ -107,7 +108,8 @@ class SyncProvider(CommandRunner):
         exec_command: list = [self.binary_path] + rsync_base_params + [source_dir, target_dir]
 
         # run the command
-        rsync_result = self.os_exec(exec_command, confirmation_required=True, capture_output=False)
+        rsync_result = self.os_exec(exec_command, confirmation_required=True, capture_output=False,
+                                    continue_on_failure=True)
 
         # save the report
         self.gen_run_report(exec_command, rsync_result.stdout, rsync_result.stderr)

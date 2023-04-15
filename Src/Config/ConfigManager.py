@@ -44,6 +44,7 @@ class ConfigManager:
         """
         Search for the saved configurations.
         """
+        self.config_list.clear()
         config_number = 0
         for file_name in sorted(os.listdir(self.config_directory)):
             if self.config_match_regex.match(file_name):
