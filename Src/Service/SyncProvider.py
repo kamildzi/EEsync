@@ -109,6 +109,7 @@ class SyncProvider(CommandRunner):
 
         # run the command
         rsync_result = self.os_exec(exec_command, confirmation_required=True, capture_output=False,
+                                    logging_enabled=True, logging_enabled_runtime=True,
                                     continue_on_failure=True)
 
         # save the report

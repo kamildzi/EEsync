@@ -1,5 +1,8 @@
 import atexit
+import random
+import string
 import subprocess
+import time
 from os import environ
 from sys import getdefaultencoding
 
@@ -34,7 +37,8 @@ class CommandRunner:
 
     @staticmethod
     def os_exec(command: list, confirmation_required: bool = False, silent: bool = False, capture_output: bool = True,
-                logging_enabled: bool = True, continue_on_failure: bool = False) -> subprocess.CompletedProcess:
+                logging_enabled: bool = True, logging_enabled_runtime: bool = False, continue_on_failure: bool = False
+                ) -> subprocess.CompletedProcess:
         """
         A runner method. Throws exception when returncode is not 0.
         :param command: Command and the parameters in the form of a list.
@@ -42,12 +46,19 @@ class CommandRunner:
         :param silent: bool value, False by default. Allows to suppress printing the binary name that gets executed.
         :param capture_output: bool value, True by default. Allows to control whether the command output is captured.
         :param logging_enabled: bool value, True by default. Allows to control whether the logging feature is enabled.
+        :param logging_enabled_runtime: bool value, False by default. Applies only if logging_enabled is True.
+        Allows to capture the command run time.
         :param continue_on_failure: bool value, False by default. Allows to continue normal execution on failures
         (allows to accept non-zero result codes).
         :return: CompletedProcess object.
         """
         process_env = dict(environ)
         process_env['LC_ALL'] = 'C'
+
+        # prepare exec ID (for the logging purpose)
+        exec_id = '[' + ''.join(
+            random.choice(string.ascii_letters + string.digits) for _ in range(6)
+        ) + ']'
 
         if confirmation_required and GeneralSettings.runner["confirm_os_commands"]:
             print("About to execute the command: \n"
@@ -59,22 +70,27 @@ class CommandRunner:
 
         if user_confirmed:
             if logging_enabled:
-                Logger.log("Executing command: \n" + ' '.join(command))
+                Logger.log(exec_id + " Executing command: \n" + ' '.join(command))
             if not silent:
                 print(f"( Running: {command[0]} ... )")
+            processing_time_start = time.time()
             command_result = subprocess.run(
                 command,
                 capture_output=capture_output,
                 encoding=getdefaultencoding(),
                 env=process_env
             )
+            processing_time_stop = time.time()
+            time_diff_secs = processing_time_stop - processing_time_start
+            if logging_enabled and logging_enabled_runtime:
+                Logger.log(f"{exec_id} Command run time: {time_diff_secs:.2f} [sec].")
         else:
             if logging_enabled:
-                Logger.log("Skipped command / execution aborted: \n" + ' '.join(command))
+                Logger.log(exec_id + " Skipped command / execution aborted: \n" + ' '.join(command))
             raise SystemExit("Aborted.")
 
         if command_result.returncode != 0:
-            failed_msg = str(f"Error: Failed to run: {command} "
+            failed_msg = str(f"{exec_id} Error: Failed to run: {command} "
                              + f"\nDetails: \nSTDOUT: {command_result.stdout}\nSTDERR: {command_result.stderr}\n")
             if logging_enabled:
                 Logger.log(failed_msg)
