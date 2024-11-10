@@ -11,7 +11,7 @@ from Src.Service.SyncProvider import SyncProvider
 
 
 class EESync:
-    __version = '0.9.4'
+    __version = '0.9.5'
 
     sync_service = SyncProvider()
     crypt_service = CryptProvider()
@@ -101,7 +101,7 @@ class EESync:
 
         # ask for the final review and confirmation
         print(
-            f"\nYou are bout to run the action: {user_action.name} \n"
+            f"\nYou are about to run the action: {user_action.name} \n"
             + "for following configuration: \n"
             + f" Data directory: \n >> {entry.backup_source_dir}\n"
             + f" Backup data directory: \n >> {entry.backup_target_dir}\n"
